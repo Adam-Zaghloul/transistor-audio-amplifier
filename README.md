@@ -29,17 +29,7 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 
 ## Stage Architecture
 
-```
-[3.5 mm Jack] → [C1 1µF coupling] → [Q1 2SC1815 Common-Emitter]
-                                              │ gain ≈ 163.6
-                                        [Q2 2N3904 Emitter-Follower]
-                                              │ impedance buffer
-                                        [Q3 BDX53C Common-Collector]
-                                              │ high current drive
-                                        [C2 1000µF] → [8Ω Speaker]
-```
-
----
+<img width="761" height="395" alt="Bloc_diagramme" src="https://github.com/user-attachments/assets/dbe429e1-c520-4499-8767-5a7cddab9a5c" />
 
 ## Stage-by-Stage Design
 
