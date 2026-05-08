@@ -208,6 +208,18 @@ Each fix was verified with the oscilloscope — waveform captured before and aft
 
 `Transistor biasing (voltage divider)` `DC operating point analysis` `AC small-signal analysis` `Common-emitter amplifier` `Emitter-follower (collector-common)` `Darlington power stage` `Coupling and bypass capacitor design` `Thermal management` `Multisim simulation` `Oscilloscope validation` `Audio electronics` `Fault isolation` `Component substitution`
 
+## Author & Usage Notice
+
+---
+
+## Author & Usage Notice
+
+This project was designed, built, tested, and documented by Adam Zaghloul as part of an Electronics Engineering Technology portfolio.
+
+This repository is shared publicly for portfolio review and educational reference only. You may not copy, redistribute, modify, or present this work, documentation, images, schematics, code, or design files as your own without written permission.
+
+Copyright © 2026 Adam Zaghloul. All rights reserved.
+
 ---
 
 *Adam Zaghloul · La Cité collégiale · Fall 2025 · [adamzaghloul07@gmail.com](mailto:adamzaghloul07@gmail.com)*
