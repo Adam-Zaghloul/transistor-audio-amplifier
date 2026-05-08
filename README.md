@@ -39,9 +39,7 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 
 ---
 
-## Stage Architecture
-
-### Block Diagram
+## Block Diagram
 
 ![Block Diagram](Bloc_diagramme.png)
 
