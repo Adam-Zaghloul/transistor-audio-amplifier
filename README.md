@@ -8,9 +8,26 @@
 
 ## Overview
 
-A fully discrete 3-stage audio amplifier designed to drive an **8 Ω speaker** from a 3.5 mm audio source (smartphone or computer). Every stage was analyzed with **DC bias-point and AC small-signal calculations** before assembly, simulated in **Multisim**, then built and validated on breadboard with an oscilloscope.
+I designed and built a fully discrete 3-stage audio amplifier to drive an **8 Ω speaker** from a 3.5 mm audio source. I analyzed each stage with **DC bias-point and AC small-signal calculations** before assembly, simulated the full circuit in **Multisim**, then built and validated the design on breadboard with an oscilloscope.
 
-The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth (20 Hz – 20 kHz), exceeding the 40 dB target specified in the design brief.
+The amplifier achieves **~44.3 dB of voltage gain** across the full audio bandwidth (20 Hz – 20 kHz), exceeding the 40 dB target in the design brief.
+
+---
+
+## What I Built
+
+- **Designed** the 3-stage architecture from scratch: common-emitter preamp → emitter-follower buffer → Darlington power stage
+- **Calculated** the DC bias point for Q1: Vb, Ve, Ic, Vc, Vce, and dynamic emitter resistance (re)
+- **Calculated** AC voltage gain: G1 = Rc / re = 163.6 (~44.3 dB) — verified against the 40 dB target
+- **Designed** the input and output coupling capacitors (C1, C2) and emitter bypass capacitor (C3) for full audio bandwidth coverage
+- **Simulated** the complete circuit in Multisim — verified bias point, gain, bandwidth, and THD before breadboard assembly
+- **Assembled** the circuit on breadboard and connected a 3.5 mm audio jack as the input source
+- **Tested** audio output quality by driving an 8 Ω speaker with music from a smartphone
+- **Measured** voltage gain and bandwidth using an oscilloscope at multiple frequencies
+- **Troubleshot** Q3 thermal saturation — identified the root cause, substituted the BDX53C Darlington, and added R5 (1 Ω) current-limiting resistor
+- **Verified** the fix with the oscilloscope — captured waveforms before and after every corrective change
+- **Validated** final performance: 44.3 dB gain, 20 Hz – 20 kHz bandwidth, THD < 5 %
+- **Documented** the full design in a technical report including theory, calculations, simulation results, and test data
 
 ---
 
@@ -31,10 +48,9 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 ### Non-Functional Requirements
 
 - Low noise for good audio quality
-- THD < 5 % at nominal power — no strong distortion in normal operation
+- THD < 5 % at nominal power
 - Circuit stable during operation — no audio drop-outs
 - Q3 must not overheat excessively
-- Clean, safe wiring — easy to debug and modify
 - Standard, replaceable components
 
 ---
@@ -43,8 +59,7 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 
 ![Block Diagram](Bloc_diagramme.png)
 
-*Signal flow: Audio source → 3.5 mm jack → C1 (DC block) → Stage 1 Q1 (voltage gain) → Stage 2 Q2 (buffer) → Stage 3 Q3 (current/power) → C2 (DC block) → 8 Ω speaker. 9 V supply powers all three stages.*
-
+*Signal flow: Audio source → 3.5 mm jack → C1 (DC block) → Q1 2SC1815 (voltage gain) → Q2 2N3904 (buffer) → Q3 BDX53C (power) → C2 (DC block) → 8 Ω speaker. 9 V supply powers all three stages.*
 
 ---
 
@@ -52,14 +67,14 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 
 ![Multisim Schematic + Oscilloscope](SCHÉMA-ÉLECTRONIQUE.png)
 
-**What the oscilloscope shows:**
-- **Channel A** (output probe) — amplified signal, ~5.5 V scale
-- **Channel B** (input probe) — source signal, ~57.8 mV scale
-- Gain visually confirmed: output waveform is significantly larger than input
-- Both waveforms are sinusoidal with no visible clipping or distortion at nominal level
-- Timebase: 500 ms/div · Both channels: 2 V/div
+**Oscilloscope readout:**
+- **Channel A** (output) — amplified signal, ~5.5 V scale
+- **Channel B** (input) — source signal, ~57.8 mV scale
+- Gain visually confirmed: output waveform significantly larger than input
+- Both channels sinusoidal — no clipping or visible distortion at nominal level
+- Timebase: 500 ms/div
 
-> **Note on Q3 in Multisim:** Q3 appears as `2N3904` in the simulation schematic because the BDX53C Darlington is not in the default Multisim library. The 2N3904 was used as a functional substitute for simulation purposes. The physical breadboard build uses the **BDX53C**.
+> **Note on Q3 in Multisim:** Q3 appears as `2N3904` in the simulation because the BDX53C Darlington is not in the default Multisim library. The 2N3904 was used as a functional substitute for simulation only. The physical build uses the **BDX53C**.
 
 ---
 
@@ -67,11 +82,9 @@ The design achieves **~44.3 dB of voltage gain** across the full audio bandwidth
 
 ### Stage 1 — Q1 (2SC1815) · Common-Emitter Preamp
 
-The **2SC1815** is a low-noise NPN transistor optimized for audio preamplification. Common-emitter configuration provides maximum voltage gain.
+I chose the **2SC1815** for its low noise figure and suitability for small-signal audio preamplification. Common-emitter configuration gives maximum voltage gain.
 
-**Why 2SC1815?** Low noise figure, small-signal NPN designed for audio, stable at low collector currents.
-
-**DC Bias Analysis:**
+**DC Bias Calculations:**
 
 | Parameter | Formula | Value |
 |---|---|---|
@@ -89,39 +102,32 @@ The **2SC1815** is a low-noise NPN transistor optimized for audio preamplificati
 G1 = Rc / re = 39 kΩ / 238.3 Ω ≈ 163.6   →   44.3 dB
 ```
 
-**C3 (47 µF)** bypasses R4 at AC frequencies, removing emitter degeneration and maximizing gain without disturbing the DC operating point.
+**C3 (47 µF)** bypasses R4 at AC frequencies — removes emitter degeneration and maximizes gain without disturbing the DC bias point.
 
-**Bias resistor justification:**
-- R1 (3.3 MΩ) / R3 (820 kΩ): voltage divider sets a stable base voltage, reduces distortion risk and ensures clean signal
-- R4 (10 kΩ): emitter resistor stabilizes quiescent current against temperature drift (thermal stabilization)
-- R2 (39 kΩ): collector load — large enough for high gain without pushing Q1 into saturation
+**Component justification:**
+- R1 (3.3 MΩ) / R3 (820 kΩ): voltage divider sets a stable base voltage — reduces distortion and thermal drift
+- R4 (10 kΩ): emitter resistor stabilizes quiescent current against temperature
+- R2 (39 kΩ): collector load — large enough for high gain without saturating Q1
 
 ### Stage 2 — Q2 (2N3904) · Emitter-Follower Buffer
 
-Configured as **collector-common (emitter-follower)**:
-- Voltage gain ≈ 1 (no voltage amplification)
+I configured Q2 as a **collector-common (emitter-follower)**:
+- Voltage gain ≈ 1 — no additional voltage amplification
 - **High input impedance** — does not load Stage 1 and degrade gain
-- **Low output impedance** — able to drive Stage 3's base without signal loss
-- Provides additional current buffering between preamp and power stage
+- **Low output impedance** — drives Stage 3 base without signal loss
 
 ### Stage 3 — Q3 (BDX53C) · Darlington Power Output Stage
 
-The **BDX53C** is an NPN Darlington power transistor, also in **collector-common** configuration:
-- Very high current gain (Darlington = β₁ × β₂) — delivers sufficient current into the 8 Ω load
+I chose the **BDX53C** NPN Darlington in **collector-common** configuration:
+- Very high current gain (β₁ × β₂) — delivers sufficient current into the 8 Ω load
 - Protection diode on base prevents reverse-bias breakdown
-- **R5 (1 Ω):** limits collector current peak and protects against thermal runaway
+- **R5 (1 Ω):** limits collector current and protects against thermal runaway
 
-**Why BDX53C?** Rated for high continuous collector current, thermal stability at power levels required to drive a speaker, standard TO-220 package.
-
-**Output coupling and low-frequency cutoff:**
-
-C2 (1000 µF) blocks DC voltage from the speaker. The −3 dB low-frequency cutoff:
+**Low-frequency cutoff (C2 = 1000 µF):**
 
 ```
 Fl = 1 / (2π × C2 × R_speaker) = 1 / (2π × 1000µF × 8Ω) ≈ 20 Hz
 ```
-
-The upper −3 dB frequency is limited by parasitic capacitances of the transistors (~10–20 kHz), confirmed in simulation to be within the audio band.
 
 ---
 
@@ -134,7 +140,7 @@ The upper −3 dB frequency is limited by parasitic capacitances of the transist
 | Q3 — BDX53C | Emitter-follower (Darlington) | ≈ 1 |
 | **Total** | | **163.6 × 1 × 1 = 163.6 ≈ 44.3 dB** |
 
-> Target was 40 dB — **specification exceeded**.
+> Target was 40 dB — **specification exceeded.**
 
 ---
 
@@ -160,7 +166,7 @@ The upper −3 dB frequency is limited by parasitic capacitances of the transist
 
 ## Simulation Results (Multisim)
 
-| Parameter | Simulated Value | Target | Pass |
+| Parameter | Simulated | Target | Pass |
 |---|---|---|---|
 | Vb (Q1) | 1.79 V | 1.79 V (calc.) | ✅ |
 | Vce (Q1) | 3.66 V | 3.65 V (calc.) | ✅ |
@@ -168,7 +174,6 @@ The upper −3 dB frequency is limited by parasitic capacitances of the transist
 | Voltage gain G1 | 164 (44 dB) | ≥ 40 dB | ✅ |
 | Bandwidth | 20 Hz – 20 kHz | 20 Hz – 20 kHz | ✅ |
 | THD | < 5 % at nominal power | < 5 % | ✅ |
-| Frequency response | Flat across audio band | Flat | ✅ |
 
 ---
 
@@ -176,10 +181,8 @@ The upper −3 dB frequency is limited by parasitic capacitances of the transist
 
 | Problem | Root Cause | Solution Applied | Verified |
 |---|---|---|---|
-| Q3 thermal saturation / overheating | Original output transistor dissipating too much power | Replaced with BDX53C Darlington power transistor; added R5 (1 Ω) current-limit resistor | Oscilloscope — waveform before/after |
-| Distortion / crackling at high volume | Input signal amplitude too large → Q1 driven into saturation | Reduced input level to keep Q1 in active region | Oscilloscope — clean sine confirmed |
-
-Each fix was verified with the oscilloscope — waveform captured before and after every corrective change.
+| Q3 thermal saturation / overheating | Output transistor dissipating too much power | Replaced with BDX53C Darlington; added R5 (1 Ω) current-limit resistor | Oscilloscope — waveform before/after |
+| Distortion / crackling at high volume | Input signal too large → Q1 driven into saturation | Reduced input level to keep Q1 in active region | Oscilloscope — clean sine confirmed |
 
 ---
 
@@ -187,9 +190,9 @@ Each fix was verified with the oscilloscope — waveform captured before and aft
 
 | Week | Dates | Activity |
 |---|---|---|
-| 1 | Nov 10–17, 2025 | Design brief written; target specs defined; 3-stage architecture chosen; component selection and justification |
-| 2 | Nov 17–24, 2025 | DC bias calculated; Multisim simulation built; gain (44 dB) and bandwidth (20 Hz–20 kHz) verified in simulation |
-| 3 | Nov 24 – Dec 1, 2025 | Breadboard assembly; bench testing with oscilloscope; Q3 overheating issue encountered and resolved |
+| 1 | Nov 10–17, 2025 | Design brief; target specs defined; 3-stage architecture chosen; component selection and justification |
+| 2 | Nov 17–24, 2025 | DC bias calculated; Multisim simulation built; gain (44 dB) and bandwidth verified |
+| 3 | Nov 24 – Dec 1, 2025 | Breadboard assembly; bench testing; Q3 overheating issue encountered and resolved |
 | 4 | Dec 1–8, 2025 | Final validation; report written; documentation completed |
 
 ---
@@ -199,16 +202,12 @@ Each fix was verified with the oscilloscope — waveform captured before and aft
 - Malvino & Bates, *Electronic Principles*, 8th ed.
 - Toshiba Corporation — 2SC1815 Datasheet
 - STMicroelectronics — [BDX53C Datasheet](https://www.digikey.ca/fr/products/detail/stmicroelectronics/BDX53C/1852123)
-- Simple Transistor Amplifier Circuit — circuits-diy.com
-- Common-Emitter Amplifier explanation — r/diypedals
 
 ---
 
 ## Skills Demonstrated
 
-`Transistor biasing (voltage divider)` `DC operating point analysis` `AC small-signal analysis` `Common-emitter amplifier` `Emitter-follower (collector-common)` `Darlington power stage` `Coupling and bypass capacitor design` `Thermal management` `Multisim simulation` `Oscilloscope validation` `Audio electronics` `Fault isolation` `Component substitution`
-
-## Author & Usage Notice
+`Transistor biasing (voltage divider)` `DC operating point analysis` `AC small-signal analysis` `Common-emitter amplifier` `Emitter-follower` `Darlington power stage` `Coupling and bypass capacitor design` `Thermal management` `Multisim simulation` `Oscilloscope validation` `Audio electronics` `Fault isolation` `Component substitution`
 
 ---
 
